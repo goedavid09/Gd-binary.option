@@ -1,24 +1,947 @@
-ctx.strokeStyle = "#00ff88";
+!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demo Trading App</title>
 
-  ctx.lineWidth = 2;
+<style>
+* {
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #101827;
+  color: white;
+}
+
+.container {
+  max-width: 600px;
+  margin: auto;
+  padding: 15px;
+}
+
+.card {
+  background: #1b2638;
+  padding: 20px;
+  border-radius: 15px;
+  margin-bottom: 15px;
+}
+
+h1, h2 {
+  text-align: center;
+}
+
+input {
+  width: 100%;
+  padding: 13px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+button {
+  width: 100%;
+  padding: 13px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.primary {
+  background: #2563eb;
+  color: white;
+}
+
+.green {
+  background: #16a34a;
+  color: white;
+}
+
+.red {
+  background: #dc2626;
+  color: white;
+}
+
+.gray {
+  background: #475569;
+  color: white;
+}
+
+.hidden {
+  display: none;
+}
+
+.message {
+  text-align: center;
+  margin-top: 12px;
+}
+
+.balance {
+  text-align: center;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.price {
+  text-align: center;
+  font-size: 28px;
+  margin: 15px;
+}
+
+.chart {
+  height: 220px;
+  background: #0b1220;
+  border-radius: 10px;
+}
+
+canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.buttons button {
+  flex: 1;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 8px;
+  text-align: center;
+  border-bottom: 1px solid #39465a;
+}
+
+.userbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- LOGIN -->
+<div id="loginPage" class="card">
+
+  <h1>🔐 Login</h1>
+
+  <input
+    type="email"
+    id="loginEmail"
+    placeholder="Email"
+  >
+
+  <input
+    type="password"
+    id="loginPassword"
+    placeholder="Password"
+  >
+
+  <button
+    class="primary"
+    onclick="login()"
+  >
+    Login
+  </button>
+
+  <button
+    class="gray"
+    onclick="showRegister()"
+  >
+    Create Account
+  </button>
+
+  <div id="loginMessage" class="message"></div>
+
+</div>
+
+
+<!-- REGISTER -->
+<div id="registerPage" class="card hidden">
+
+  <h1>📝 Register</h1>
+
+  <input
+    type="text"
+    id="registerName"
+    placeholder="Full Name"
+  >
+
+  <input
+    type="email"
+    id="registerEmail"
+    placeholder="Email"
+  >
+
+  <input
+    type="password"
+    id="registerPassword"
+    placeholder="Password"
+  >
+
+  <input
+    type="password"
+    id="confirmPassword"
+    placeholder="Confirm Password"
+  >
+
+  <button
+    class="green"
+    onclick="register()"
+  >
+    Register
+  </button>
+
+  <button
+    class="gray"
+    onclick="showLogin()"
+  >
+    Back to Login
+  </button>
+
+  <div id="registerMessage" class="message"></div>
+
+</div>
+
+
+<!-- TRADING APP -->
+<div id="tradingPage" class="hidden">
+
+  <div class="userbar">
+
+    <div>
+      👤 <span id="username"></span>
+    </div>
+
+    <button
+      class="gray"
+      onclick="logout()"
+      style="width:auto;padding:8px 12px;"
+    >
+      Logout
+    </button>
+
+  </div>
+
+
+  <div class="card">
+
+    <h2>📈 Demo Trading App</h2>
+
+    <p>Virtual Balance</p>
+
+    <div
+      class="balance"
+      id="balance"
+    >
+      $10,000.00
+    </div>
+
+  </div>
+
+
+  <div class="card">
+
+    <p>Current Price</p>
+
+    <div
+      class="price"
+      id="price"
+    >
+      100.00
+    </div>
+
+    <div class="chart">
+      <canvas id="chart"></canvas>
+    </div>
+
+  </div>
+
+
+  <div class="card">
+
+    <label>Trade Amount</label>
+
+    <input
+      type="number"
+      id="amount"
+      value="100"
+      min="1"
+    >
+
+    <label>Expiry</label>
+
+    <select
+      id="expiry"
+      style="width:100%;padding:13px;border-radius:8px;"
+    >
+      <option value="10">10 Seconds</option>
+      <option value="30">30 Seconds</option>
+      <option value="60">1 Minute</option>
+    </select>
+
+    <br><br>
+
+    <div class="buttons">
+
+      <button
+        class="green"
+        onclick="placeTrade('HIGHER')"
+      >
+        ⬆ HIGHER
+      </button>
+
+      <button
+        class="red"
+        onclick="placeTrade('LOWER')"
+      >
+        ⬇ LOWER
+      </button>
+
+    </div>
+
+    <div
+      id="message"
+      class="message"
+    ></div>
+
+  </div>
+
+
+  <div class="card">
+
+    <h3>📋 Trade History</h3>
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Trade</th>
+          <th>Amount</th>
+          <th>Result</th>
+        </tr>
+      </thead>
+
+      <tbody id="history"></tbody>
+
+    </table>
+
+  </div>
+
+</div>
+
+</div>
+
+
+<script>
+
+let balance = 10000;
+let price = 100;
+let prices = [];
+let activeTrade = false;
+
+
+/* =========================
+   REGISTER
+========================= */
+
+function register() {
+
+  const name =
+    document.getElementById("registerName").value.trim();
+
+  const email =
+    document.getElementById("registerEmail").value.trim();
+
+  const password =
+    document.getElementById("registerPassword").value;
+
+  const confirm =
+    document.getElementById("confirmPassword").value;
+
+
+  if (!name || !email || !password) {
+
+    showRegisterMessage(
+      "Please fill in all fields."
+    );
+
+    return;
+  }
+
+
+  if (password !== confirm) {
+
+    showRegisterMessage(
+      "Passwords do not match."
+    );
+
+    return;
+  }
+
+
+  if (password.length < 6) {
+
+    showRegisterMessage(
+      "Password must be at least 6 characters."
+    );
+
+    return;
+  }
+
+
+  const user = {
+    name: name,
+    email: email,
+    password: password
+  };
+
+
+  localStorage.setItem(
+    "demoUser",
+    JSON.stringify(user)
+  );
+
+
+  showRegisterMessage(
+    "✅ Account created successfully!"
+  );
+
+
+  setTimeout(() => {
+
+    showLogin();
+
+  }, 1000);
+
+}
+
+
+/* =========================
+   LOGIN
+========================= */
+
+function login() {
+
+  const email =
+    document.getElementById("loginEmail").value.trim();
+
+  const password =
+    document.getElementById("loginPassword").value;
+
+
+  const savedUser =
+    localStorage.getItem("demoUser");
+
+
+  if (!savedUser) {
+
+    showLoginMessage(
+      "No account found. Please register first."
+    );
+
+    return;
+  }
+
+
+  const user =
+    JSON.parse(savedUser);
+
+
+  if (
+    email === user.email &&
+    password === user.password
+  ) {
+
+    localStorage.setItem(
+      "loggedIn",
+      "true"
+    );
+
+    openTradingPage(user);
+
+  } else {
+
+    showLoginMessage(
+      "❌ Incorrect email or password."
+    );
+
+  }
+
+}
+
+
+/* =========================
+   LOGOUT
+========================= */
+
+function logout() {
+
+  localStorage.removeItem(
+    "loggedIn"
+  );
+
+  document
+    .getElementById("tradingPage")
+    .classList.add("hidden");
+
+  document
+    .getElementById("loginPage")
+    .classList.remove("hidden");
+
+}
+
+
+/* =========================
+   OPEN TRADING PAGE
+========================= */
+
+function openTradingPage(user) {
+
+  document
+    .getElementById("loginPage")
+    .classList.add("hidden");
+
+  document
+    .getElementById("registerPage")
+    .classList.add("hidden");
+
+  document
+    .getElementById("tradingPage")
+    .classList.remove("hidden");
+
+  document
+    .getElementById("username")
+    .innerText = user.name;
+
+  updateBalance();
+
+}
+
+
+/* =========================
+   SHOW REGISTER
+========================= */
+
+function showRegister() {
+
+  document
+    .getElementById("loginPage")
+    .classList.add("hidden");
+
+  document
+    .getElementById("registerPage")
+    .classList.remove("hidden");
+
+}
+
+
+/* =========================
+   SHOW LOGIN
+========================= */
+
+function showLogin() {
+
+  document
+    .getElementById("registerPage")
+    .classList.add("hidden");
+
+  document
+    .getElementById("loginPage")
+    .classList.remove("hidden");
+
+}
+
+
+/* =========================
+   MESSAGES
+========================= */
+
+function showLoginMessage(text) {
+
+  document
+    .getElementById("loginMessage")
+    .innerText = text;
+
+}
+
+
+function showRegisterMessage(text) {
+
+  document
+    .getElementById("registerMessage")
+    .innerText = text;
+
+}
+
+
+/* =========================
+   BALANCE
+========================= */
+
+function updateBalance() {
+
+  document
+    .getElementById("balance")
+    .innerText =
+    "$" + balance.toFixed(2);
+
+}
+
+
+/* =========================
+   PRICE
+========================= */
+
+function updatePrice() {
+
+  price +=
+    (Math.random() - 0.5) * 2;
+
+  if (price < 1) {
+    price = 1;
+  }
+
+  prices.push(price);
+
+  if (prices.length > 60) {
+    prices.shift();
+  }
+
+  document
+    .getElementById("price")
+    .innerText =
+    price.toFixed(2);
+
+  drawChart();
+
+}
+
+
+/* =========================
+   CHART
+========================= */
+
+function drawChart() {
+
+  const canvas =
+    document.getElementById("chart");
+
+  if (!canvas) return;
+
+  const ctx =
+    canvas.getContext("2d");
+
+  canvas.width =
+    canvas.clientWidth;
+
+  canvas.height =
+    canvas.clientHeight;
+
+  ctx.clearRect(
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
+
+
+  if (prices.length < 2) {
+    return;
+  }
+
+
+  let min =
+    Math.min(...prices);
+
+  let max =
+    Math.max(...prices);
+
+
+  if (max === min) {
+    max += 1;
+    min -= 1;
+  }
+
+
+  ctx.beginPath();
+
+
+  prices.forEach((p, i) => {
+
+    const x =
+      (i / (prices.length - 1))
+      * canvas.width;
+
+    const y =
+      canvas.height -
+      ((p - min) / (max - min))
+      * canvas.height;
+
+
+    if (i === 0) {
+
+      ctx.moveTo(x, y);
+
+    } else {
+
+      ctx.lineTo(x, y);
+
+    }
+
+  });
+
+
+  ctx.strokeStyle = "#22c55e";
+
+  ctx.lineWidth = 3;
 
   ctx.stroke();
 
 }
 
-drawChart();
 
-setInterval(drawChart, 3000);
+/* =========================
+   TRADE
+========================= */
 
-updateBalance();
+function placeTrade(direction) {
+
+  if (activeTrade) {
+
+    document
+      .getElementById("message")
+      .innerText =
+      "⏳ Current trade is still running.";
+
+    return;
+  }
+
+
+  const amount =
+    Number(
+      document.getElementById("amount").value
+    );
+
+
+  const expiry =
+    Number(
+      document.getElementById("expiry").value
+    );
+
+
+  if (amount <= 0) {
+
+    document
+      .getElementById("message")
+      .innerText =
+      "Enter a valid amount.";
+
+    return;
+  }
+
+
+  if (amount > balance) {
+
+    document
+      .getElementById("message")
+      .innerText =
+      "Insufficient virtual balance.";
+
+    return;
+  }
+
+
+  activeTrade = true;
+
+  const startingPrice = price;
+
+  balance -= amount;
+
+  updateBalance();
+
+
+  document
+    .getElementById("message")
+    .innerText =
+    direction +
+    " trade started...";
+
+
+  setTimeout(() => {
+
+    const endingPrice = price;
+
+    let win = false;
+
+
+    if (
+      direction === "HIGHER" &&
+      endingPrice > startingPrice
+    ) {
+
+      win = true;
+
+    }
+
+
+    if (
+      direction === "LOWER" &&
+      endingPrice < startingPrice
+    ) {
+
+      win = true;
+
+    }
+
+
+    const payout =
+      amount * 0.80;
+
+
+    if (win) {
+
+      balance +=
+        amount + payout;
+
+      addHistory(
+        direction,
+        amount,
+        "WIN +$" +
+        payout.toFixed(2)
+      );
+
+
+      document
+        .getElementById("message")
+        .innerText =
+        "✅ WIN!";
+
+
+    } else {
+
+      addHistory(
+        direction,
+        amount,
+        "LOSS -$" +
+        amount.toFixed(2)
+      );
+
+
+      document
+        .getElementById("message")
+        .innerText =
+        "❌ LOSS";
+
+    }
+
+
+    updateBalance();
+
+    activeTrade = false;
+
+  }, expiry * 1000);
+
+}
+
+
+/* =========================
+   HISTORY
+========================= */
+
+function addHistory(
+  direction,
+  amount,
+  result
+) {
+
+  const table =
+    document.getElementById("history");
+
+  const row =
+    document.createElement("tr");
+
+
+  row.innerHTML = `
+    <td>${direction}</td>
+    <td>$${amount.toFixed(2)}</td>
+    <td>${result}</td>
+  `;
+
+
+  table.prepend(row);
+
+}
+
+
+/* =========================
+   START
+========================= */
+
+for (
+  let i = 0;
+  i < 30;
+  i++
+) {
+
+  prices.push(
+    price +
+    (Math.random() - 0.5) * 5
+  );
+
+}
+
+
+setInterval(
+  updatePrice,
+  1000
+);
+
+
+const savedLogin =
+  localStorage.getItem("loggedIn");
+
+const savedUser =
+  localStorage.getItem("demoUser");
+
+
+if (
+  savedLogin === "true" &&
+  savedUser
+) {
+
+  openTradingPage(
+    JSON.parse(savedUser)
+  );
+
+}
 
 </script>
 
 </body>
 </html>
-Ndiyo 👍 Hii ni demo trading app ya kujifunzia tu. Inatumia virtual balance, hakuna pesa halisi wala kuunganisha broker.
-1️⃣ Fungua index.html
-GitHub → repository yako → index.html → ✏️ Edit
-2️⃣ Futa code yote iliyopo
-3️⃣ Copy code hii yote 👇
+Ndiyo. Tutaiweka Login/Register ya demo ndani ya app yako. Kwa hatua hii, taarifa za account zitahifadhiwa kwenye browser ya simu (localStorage), kwa hiyo si mfumo salama wa production na usitumie password halisi.
+Hatua 1 — Fungua index.html
+GitHub → repository yako → index.html → ✏️ Edit.
+Hatua 2 — Futa code yote iliyopo
+Kisha paste code hii yote:
 HTML
